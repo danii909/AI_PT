@@ -12,7 +12,7 @@ import streamlit as st
 import qrcode
 
 # Carica variabili d'ambiente da file .env se presente
-load_dotenv(override=True)
+load_dotenv()
 
 from styles import CUSTOM_CSS
 from analyzer import analyze_video_stream, validate_api_key
@@ -59,11 +59,8 @@ def generate_qr_code(url: str) -> io.BytesIO:
 
 
 # Inizializzazione Session State
-env_key = os.getenv("GEMINI_API_KEY", "").strip()
-if "api_key" not in st.session_state or not st.session_state.api_key:
-    st.session_state.api_key = env_key
-elif env_key and st.session_state.api_key != env_key:
-    st.session_state.api_key = env_key
+if "api_key" not in st.session_state:
+    st.session_state.api_key = os.getenv("GEMINI_API_KEY", "")
 
 if "history" not in st.session_state:
     st.session_state.history = []
@@ -112,9 +109,9 @@ with st.sidebar:
     # Scelta del Modello Gemini
     model_choice = st.selectbox(
         "🧠 Modello Gemini",
-        options=["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-3.8-flash", "gemini-2.5-pro"],
+        options=["gemini-2.5-flash", "gemini-2.0-flash", "gemini-2.5-pro"],
         index=0,
-        help="Con sistema automatico di retry e fallback in caso di traffico elevato."
+        help="Gemini 2.5 Flash è ultra-veloce ed eccellente nell'analisi video fotogramma per fotogramma."
     )
 
     st.markdown("---")
@@ -130,7 +127,7 @@ with st.sidebar:
     
     try:
         qr_buf = generate_qr_code(mobile_url)
-        st.image(qr_buf, caption="Inquadra col telefono per aprire l'app", width="stretch")
+        st.image(qr_buf, caption="Inquadra col telefono per aprire l'app", use_container_width=True)
     except Exception:
         pass
 

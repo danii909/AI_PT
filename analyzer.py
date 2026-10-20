@@ -137,53 +137,22 @@ def analyze_video_stream(
         if status_callback:
             status_callback("⚡ Il Coach sta analizzando l'esecuzione...")
 
-        # Lista di modelli con fallback automatico in caso di picchi di traffico (503 UNAVAILABLE)
-        candidate_models = [model_name]
-        for fallback in ["gemini-2.5-flash-lite", "gemini-3.8-flash", "gemini-flash-latest"]:
-            if fallback not in candidate_models:
-                candidate_models.append(fallback)
+        # Generazione in streaming: il testo appare in tempo reale!
+        response_stream = client.models.generate_content_stream(
+            model=model_name,
+            contents=[
+                video_content,
+                prompt_text
+            ],
+            config=types.GenerateContentConfig(
+                system_instruction=SYSTEM_INSTRUCTION,
+                temperature=0.25,
+            )
+        )
 
-        last_error = None
-        for current_model in candidate_models:
-            for attempt in range(2):
-                try:
-                    response_stream = client.models.generate_content_stream(
-                        model=current_model,
-                        contents=[
-                            video_content,
-                            prompt_text
-                        ],
-                        config=types.GenerateContentConfig(
-                            system_instruction=SYSTEM_INSTRUCTION,
-                            temperature=0.25,
-                        )
-                    )
-
-                    # Testa il primo chunk per verificare se il server risponde o dà 503
-                    for chunk in response_stream:
-                        if chunk.text:
-                            yield chunk.text
-                    return  # Successo!
-
-                except Exception as e:
-                    err_str = str(e)
-                    last_error = e
-                    # Se è un errore 503 / sovraccarico temporaneo, attendiamo o proviamo il fallback
-                    if "503" in err_str or "UNAVAILABLE" in err_str or "high demand" in err_str:
-                        if attempt == 0:
-                            if status_callback:
-                                status_callback("⏳ Server momentaneamente occupato, secondo tentativo in corso...")
-                            time.sleep(2)
-                            continue
-                        else:
-                            if status_callback:
-                                status_callback(f"🔄 Passaggio automatico al server di backup ({current_model})...")
-                            break
-                    else:
-                        raise e
-
-        if last_error:
-            raise last_error
+        for chunk in response_stream:
+            if chunk.text:
+                yield chunk.text
 
     finally:
         # Pulizia file temporaneo locale
