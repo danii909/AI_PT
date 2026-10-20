@@ -12,7 +12,7 @@ import streamlit as st
 import qrcode
 
 # Carica variabili d'ambiente da file .env se presente
-load_dotenv()
+load_dotenv(override=True)
 
 from styles import CUSTOM_CSS
 from analyzer import analyze_video_stream, validate_api_key
@@ -59,8 +59,11 @@ def generate_qr_code(url: str) -> io.BytesIO:
 
 
 # Inizializzazione Session State
-if "api_key" not in st.session_state:
-    st.session_state.api_key = os.getenv("GEMINI_API_KEY", "")
+env_key = os.getenv("GEMINI_API_KEY", "").strip()
+if "api_key" not in st.session_state or not st.session_state.api_key:
+    st.session_state.api_key = env_key
+elif env_key and st.session_state.api_key != env_key:
+    st.session_state.api_key = env_key
 
 if "history" not in st.session_state:
     st.session_state.history = []
@@ -127,7 +130,7 @@ with st.sidebar:
     
     try:
         qr_buf = generate_qr_code(mobile_url)
-        st.image(qr_buf, caption="Inquadra col telefono per aprire l'app", use_container_width=True)
+        st.image(qr_buf, caption="Inquadra col telefono per aprire l'app", width="stretch")
     except Exception:
         pass
 
