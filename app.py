@@ -112,9 +112,9 @@ with st.sidebar:
     # Scelta del Modello Gemini
     model_choice = st.selectbox(
         "🧠 Modello Gemini",
-        options=["gemini-2.5-flash", "gemini-2.0-flash", "gemini-2.5-pro"],
+        options=["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-3.8-flash", "gemini-2.5-pro"],
         index=0,
-        help="Gemini 2.5 Flash è ultra-veloce ed eccellente nell'analisi video fotogramma per fotogramma."
+        help="Con sistema automatico di retry e fallback in caso di traffico elevato."
     )
 
     st.markdown("---")
