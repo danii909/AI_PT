@@ -1,0 +1,18 @@
+{
+  "name": "Apex Coach AI - Personal Trainer",
+  "short_name": "Apex Coach",
+  "description": "AI Personal Trainer e analisi biomeccanica video in tempo reale con Gemini",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#080a0f",
+  "theme_color": "#080a0f",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
